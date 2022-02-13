@@ -3,6 +3,7 @@ package ru.job4j.list;
 import java.util.*;
 
 public class SimpleArrayList<T> implements List<T> {
+    private static final int DEFAULT_CAPACITY = 10;
 
     private T[] container;
 
@@ -12,6 +13,10 @@ public class SimpleArrayList<T> implements List<T> {
 
     public SimpleArrayList(int capacity) {
         this.container = (T[]) new Object[capacity];
+    }
+
+    public SimpleArrayList() {
+        this.container = (T[]) new Object[DEFAULT_CAPACITY];
     }
 
     @Override
