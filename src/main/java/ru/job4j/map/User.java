@@ -13,6 +13,7 @@ public class User {
         this.birthday = birthday;
     }
 
+    @SuppressWarnings("CheckStyle")
     @Override
     public int hashCode() {
         return Objects.hash(name, children, birthday);
@@ -24,8 +25,13 @@ public class User {
     }
 
     public static void main(String[] args) {
-        User firstUser = new User("Ivan", 2, new GregorianCalendar(1990, Calendar.FEBRUARY, 20));
-        User secondUser = new User("Ivan", 2, new GregorianCalendar(1990, Calendar.FEBRUARY, 20));
+        GregorianCalendar calendar = new GregorianCalendar(1990, Calendar.FEBRUARY, 20);
+        calendar.set(Calendar.HOUR, 1);
+        calendar.set(Calendar.MINUTE, 10);
+        calendar.set(Calendar.SECOND, 20);
+        calendar.set(Calendar.MILLISECOND, 30);
+        User firstUser = new User("Ivan", 2, calendar);
+        User secondUser = new User("Ivan", 2, calendar);
 
         Map<User, Object> map = new HashMap<>();
         map.put(firstUser, new Object());
