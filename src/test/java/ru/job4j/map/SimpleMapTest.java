@@ -1,6 +1,11 @@
 package ru.job4j.map;
 
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.*;
 
@@ -86,5 +91,50 @@ public class SimpleMapTest {
         SimpleMap<String, Integer> map = new SimpleMap<>();
         map.put("super", 100);
         assertFalse(map.remove("Hello"));
+    }
+
+    @Test(expected = ConcurrentModificationException.class)
+    public void whenAddAfterGetIteratorThenMustBeException() {
+        SimpleMap<String, Integer> map = new SimpleMap<>();
+        Iterator<String> iterator = map.iterator();
+        map.put("super", 100);
+        iterator.next();
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void whenGetIteratorFromEmptyMapThenNextThrowException() {
+        SimpleMap<String, Integer> map = new SimpleMap<>();
+        Iterator<String> iterator = map.iterator();
+        iterator.next();
+    }
+
+    @Test
+    public void whenCheckIterator() {
+        SimpleMap<String, Integer> map = new SimpleMap<>();
+        map.put("aaaaa", 1);
+        map.put("bbbbb", 2);
+        map.put("ccccc", 3);
+        Iterator<String> iterator = map.iterator();
+        Assert.assertTrue(iterator.hasNext());
+        Assert.assertNotNull(iterator.next());
+        Assert.assertTrue(iterator.hasNext());
+        Assert.assertNotNull(iterator.next());
+        Assert.assertTrue(iterator.hasNext());
+        Assert.assertNotNull(iterator.next());
+        Assert.assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void whenGetIteratorTwiceThenStartAlwaysFromBeginning() {
+        SimpleMap<String, Integer> map = new SimpleMap<>();
+        map.put("aaaaa", 1);
+        Assert.assertEquals("aaaaa", map.iterator().next());
+        Assert.assertEquals("aaaaa", map.iterator().next());
+    }
+
+    @Test
+    public void whenGetIteratorFromEmptyMapThenHasNextReturnFalse() {
+        SimpleMap<String, Integer> map = new SimpleMap<>();
+        Assert.assertFalse(map.iterator().hasNext());
     }
 }

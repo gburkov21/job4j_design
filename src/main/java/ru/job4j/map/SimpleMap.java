@@ -21,13 +21,8 @@ public class SimpleMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean put(K key, V value) {
-        if ((float) (count / capacity) >= LOAD_FACTOR) {
-            expand();
-        }
-        int hashCode = 0;
-        if (key != null) {
-            hashCode = key.hashCode();
-        }
+        expand();
+        int hashCode = hash(key);
         int index = indexFor(hashCode);
         if (table[index] != null) {
             return false;
@@ -42,6 +37,10 @@ public class SimpleMap<K, V> implements Map<K, V> {
         return count;
     }
 
+    private int hash(K key) {
+        return key == null ? 0 : key.hashCode();
+    }
+
     private int hash(int hashCode) {
         return hashCode == 0 ? 0 : hashCode ^ (hashCode >>> capacity);
     }
@@ -51,37 +50,35 @@ public class SimpleMap<K, V> implements Map<K, V> {
     }
 
     private void expand() {
-        table = Arrays.copyOf(table, table.length * 2);
-        capacity = table.length;
+        if ((float) (count / capacity) >= LOAD_FACTOR) {
+            table = Arrays.copyOf(table, table.length * 2);
+            capacity = table.length;
+        }
     }
 
     @Override
     public V get(K key) {
-        int hashCode = 0;
-        if (key != null) {
-            hashCode = key.hashCode();
-        }
+        V result = null;
+        int hashCode = hash(key);
         int index = indexFor(hashCode);
         if (table[index] != null) {
-            return table[index].value;
+            result = table[index].value;
         }
-        return null;
+        return result;
     }
 
     @Override
     public boolean remove(K key) {
-        int hashCode = 0;
-        if (key != null) {
-            hashCode = key.hashCode();
-        }
+        boolean rsl = false;
+        int hashCode = hash(key);
         int index = indexFor(hashCode);
         if (table[index] != null) {
             table[index] = null;
             count--;
             modCount++;
-            return true;
+            rsl = true;
         }
-        return false;
+        return rsl;
     }
 
     @Override
@@ -92,10 +89,18 @@ public class SimpleMap<K, V> implements Map<K, V> {
 
             @Override
             public boolean hasNext() {
+                boolean rsl = false;
                 if (expectedModCount != modCount) {
                     throw new ConcurrentModificationException();
                 }
-                return count < table.length;
+                for (int i = cursor; i < table.length; i++) {
+                    if (table[i] != null) {
+                        cursor = i;
+                        rsl = true;
+                        break;
+                    }
+                }
+                return rsl;
             }
 
             @Override
@@ -103,7 +108,7 @@ public class SimpleMap<K, V> implements Map<K, V> {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
-                return null;
+                return table[cursor++].key;
             }
         };
     }
