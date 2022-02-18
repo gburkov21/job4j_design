@@ -2,10 +2,7 @@ package ru.job4j.map;
 
 import ru.job4j.collection.SimpleLinkedList;
 
-import java.util.Arrays;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class SimpleMap<K, V> implements Map<K, V> {
 
@@ -51,18 +48,30 @@ public class SimpleMap<K, V> implements Map<K, V> {
 
     private void expand() {
         if ((float) (count / capacity) >= LOAD_FACTOR) {
-            table = Arrays.copyOf(table, table.length * 2);
-            capacity = table.length;
+            MapEntry<K, V>[] newMap = new MapEntry[table.length * 2];
+            capacity = newMap.length;
+            for (MapEntry<K, V> tableEntry : table) {
+                if (tableEntry != null) {
+                    int hashCode = hash(tableEntry.key);
+                    int index = indexFor(hashCode);
+                    newMap[index] = tableEntry;
+                }
+            }
+            table = newMap;
         }
     }
 
     @Override
     public V get(K key) {
         V result = null;
-        int hashCode = hash(key);
-        int index = indexFor(hashCode);
-        if (table[index] != null) {
-            result = table[index].value;
+        int keyHashCode = hash(key);
+        int keyIndex = indexFor(keyHashCode);
+        if (table[keyIndex] != null) {
+            K cellKey = table[keyIndex].key;
+            int cellHashCode = hash(cellKey);
+            if (keyHashCode == cellHashCode && Objects.equals(key, cellKey)) {
+                result = table[keyIndex].value;
+            }
         }
         return result;
     }
@@ -70,13 +79,17 @@ public class SimpleMap<K, V> implements Map<K, V> {
     @Override
     public boolean remove(K key) {
         boolean rsl = false;
-        int hashCode = hash(key);
-        int index = indexFor(hashCode);
-        if (table[index] != null) {
-            table[index] = null;
-            count--;
-            modCount++;
-            rsl = true;
+        int keyHashCode = hash(key);
+        int keyIndex = indexFor(keyHashCode);
+        if (table[keyIndex] != null) {
+            K cellKey = table[keyIndex].key;
+            int cellHashCode = hash(cellKey);
+            if (keyHashCode == cellHashCode && Objects.equals(key, cellKey)) {
+                table[keyIndex] = null;
+                count--;
+                modCount++;
+                rsl = true;
+            }
         }
         return rsl;
     }
