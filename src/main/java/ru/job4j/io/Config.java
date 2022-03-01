@@ -18,16 +18,12 @@ public class Config {
     public void load() {
         try (BufferedReader read = new BufferedReader(new FileReader(this.path))) {
             for (String line = read.readLine(); line != null; line = read.readLine()) {
-                if (line.startsWith("=")) {
-                    throw new IllegalArgumentException();
-                }
                 if (!line.startsWith("#") && !line.isBlank()) {
-                    String[] split = line.split("=");
-                    if (split.length < 2) {
-                        values.put(split[0], null);
-                    } else {
-                        values.put(split[0], split[1]);
+                    String[] split = line.split("=", 2);
+                    if (split.length < 2 || split[0].isBlank() || split[1].isBlank()) {
+                        throw new IllegalArgumentException();
                     }
+                    values.put(split[0], split[1]);
                 }
             }
         } catch (IOException e) {
