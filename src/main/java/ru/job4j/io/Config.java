@@ -38,8 +38,4 @@ public class Config {
     public int size() {
         return values.size();
     }
-
-    public static void main(String[] args) {
-
-    }
 }
