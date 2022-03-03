@@ -9,10 +9,16 @@ import java.util.function.Predicate;
 
 public class Search {
     public static void main(String[] args) throws IOException {
-        if (args.length < 2) {
-            throw new IllegalArgumentException("Please add the folder path and file extension!");
+        if (args.length != 2) {
+            throw new IllegalArgumentException("Incorrect arguments");
         }
         Path start = Paths.get(args[0]);
+        if (!start.toFile().isDirectory()) {
+            throw new IllegalArgumentException("It is not directory");
+        }
+        if (!args[1].startsWith(".")) {
+            throw new IllegalArgumentException("Wrong file extension");
+        }
         search(start, p -> p.toFile().getName().endsWith(args[1])).forEach(System.out::println);
     }
 
