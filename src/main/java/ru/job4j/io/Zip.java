@@ -10,11 +10,11 @@ import java.util.zip.ZipOutputStream;
 
 public class Zip {
 
-    public void packFiles(List<File> sources, File target) {
+    public void packFiles(List<Path> sources, File target) {
         try (ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(target)))) {
-            for (File source : sources) {
-                zip.putNextEntry(new ZipEntry(source.getPath()));
-                try (BufferedInputStream out = new BufferedInputStream(new FileInputStream(source))) {
+            for (Path path : sources) {
+                zip.putNextEntry(new ZipEntry(path.toAbsolutePath().toString()));
+                try (BufferedInputStream out = new BufferedInputStream(new FileInputStream(path.toFile()))) {
                     zip.write(out.readAllBytes());
                 }
             }
@@ -36,16 +36,20 @@ public class Zip {
 
     public static void main(String[] args) throws IOException {
         ArgsName argsName = ArgsName.of(args);
+        if (args.length != 3) {
+            throw new IllegalArgumentException("There should be three parameters.");
+        }
         String pathFolder = argsName.get("d");
         String archiveName = argsName.get("o");
         String excludeExtension = argsName.get("e");
+        if (!Paths.get(pathFolder).toFile().isDirectory()) {
+            throw new IllegalArgumentException("It is not directory");
+        }
+        if (!excludeExtension.startsWith(".") || !Paths.get(pathFolder).toFile().isDirectory()) {
+            throw new IllegalArgumentException("Wrong extension format");
+        }
         List<Path> filteredPaths = Search.search(Paths.get(pathFolder), path -> !path.toFile().getName().endsWith(excludeExtension));
-        List<File> filesList = filteredPaths.stream().map(Path::toFile).collect(Collectors.toList());
         Zip zip = new Zip();
-        zip.packFiles(filesList, new File(archiveName));
-        zip.packSingleFile(
-                new File("./pom.xml"),
-                new File("./pom.zip")
-        );
+        zip.packFiles(filteredPaths, new File(archiveName));
     }
 }
