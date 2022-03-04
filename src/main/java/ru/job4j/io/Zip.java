@@ -45,7 +45,7 @@ public class Zip {
         if (!Paths.get(pathFolder).toFile().isDirectory()) {
             throw new IllegalArgumentException("It is not directory");
         }
-        if (!excludeExtension.startsWith(".") || !Paths.get(pathFolder).toFile().isDirectory()) {
+        if (!excludeExtension.startsWith(".")) {
             throw new IllegalArgumentException("Wrong extension format");
         }
         List<Path> filteredPaths = Search.search(Paths.get(pathFolder), path -> !path.toFile().getName().endsWith(excludeExtension));
