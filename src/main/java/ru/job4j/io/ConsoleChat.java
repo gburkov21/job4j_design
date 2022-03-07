@@ -20,6 +20,7 @@ public class ConsoleChat {
     public void run() {
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in))) {
             List<String> log = new ArrayList<>();
+            List<String> botPhrasesList = readPhrases();
             System.out.println("Введите слово или фразу:");
             String input = bufferedReader.readLine();
             log.add("user: " + input);
@@ -30,9 +31,8 @@ public class ConsoleChat {
                         log.add("user: " + input);
                     }
                 }
-                List<String> phraseList = readPhrases();
-                double index = Math.random() * phraseList.size();
-                String botAnswer = phraseList.get((int) index);
+                double index = Math.random() * botPhrasesList.size();
+                String botAnswer = botPhrasesList.get((int) index);
                 System.out.println("bot: " + botAnswer);
                 log.add("bot: " + botAnswer);
                 input = bufferedReader.readLine();
