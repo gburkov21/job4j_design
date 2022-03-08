@@ -7,6 +7,10 @@ public class ArgsName {
 
     private final Map<String, String> values = new HashMap<>();
 
+    public int size() {
+        return values.size();
+    }
+
     public String get(String key) {
         String result = values.get(key);
         if (result == null) {
