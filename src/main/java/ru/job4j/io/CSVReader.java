@@ -26,8 +26,7 @@ public class CSVReader {
             List<String> csvHeaders = List.of(scanner.nextLine().split(delimiter));
 
             StringBuilder builder = new StringBuilder();
-            builder.append(String.join(delimiter, fields));
-            builder.append(System.lineSeparator());
+            builder.append(String.join(delimiter, fields).concat(System.lineSeparator()));
 
             List<Integer> indexes = new ArrayList<>();
             for (String field : fields) {
@@ -42,8 +41,7 @@ public class CSVReader {
                 for (int index : indexes) {
                     values.add(csvRow[index]);
                 }
-                builder.append(String.join(delimiter, values));
-                builder.append(System.lineSeparator());
+                builder.append(String.join(delimiter, values).concat(System.lineSeparator()));
             }
 
             if (isStdout) {
@@ -51,7 +49,6 @@ public class CSVReader {
             } else {
                 try (PrintWriter fileWriter = new PrintWriter(new FileWriter(targetPath, StandardCharsets.UTF_8))) {
                     fileWriter.write(String.valueOf(builder));
-                    fileWriter.write(System.lineSeparator());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
