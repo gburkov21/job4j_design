@@ -1,9 +1,6 @@
 package ru.job4j.io;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,33 +13,21 @@ public class CSVReader {
     public static final String STDOUT = "stdout";
 
     public static void handle(ArgsName argsName) throws Exception {
-        if (argsName.size() != 4) {
-            throw new IllegalArgumentException("Incorrect arguments");
-        }
+        checkParams(argsName);
         String sourcePath = argsName.get("path");
-        if (!Paths.get(sourcePath).toFile().isFile()) {
-            throw new IllegalArgumentException("Parameter 'path' is not file");
-        }
         String targetPath = argsName.get("out");
         boolean isStdout = STDOUT.equals(targetPath);
-        if (!isStdout && !Paths.get(targetPath).toFile().isFile()) {
-            throw new IllegalArgumentException("Parameter 'out' is not file");
-        }
         String delimiter = argsName.get("delimiter");
         String outColumns = argsName.get("filter");
 
         String[] fields = outColumns.split(",");
 
-        try (Scanner scanner = new Scanner(new FileReader(sourcePath, StandardCharsets.UTF_8));
-             PrintWriter writer = new PrintWriter(new FileWriter(targetPath, StandardCharsets.UTF_8))) {
+        try (Scanner scanner = new Scanner(new FileReader(sourcePath, StandardCharsets.UTF_8))) {
             List<String> csvHeaders = List.of(scanner.nextLine().split(delimiter));
 
-            if (isStdout) {
-                System.out.println(String.join(delimiter, fields));
-            } else {
-                writer.write(String.join(delimiter, fields));
-                writer.write(System.lineSeparator());
-            }
+            StringBuilder builder = new StringBuilder();
+            builder.append(String.join(delimiter, fields));
+            builder.append(System.lineSeparator());
 
             List<Integer> indexes = new ArrayList<>();
             for (String field : fields) {
@@ -57,11 +42,18 @@ public class CSVReader {
                 for (int index : indexes) {
                     values.add(csvRow[index]);
                 }
-                if (isStdout) {
-                    System.out.println(String.join(delimiter, values));
-                } else {
-                    writer.write(String.join(delimiter, values));
-                    writer.write(System.lineSeparator());
+                builder.append(String.join(delimiter, values));
+                builder.append(System.lineSeparator());
+            }
+
+            if (isStdout) {
+                System.out.println(builder);
+            } else {
+                try (PrintWriter fileWriter = new PrintWriter(new FileWriter(targetPath, StandardCharsets.UTF_8))) {
+                    fileWriter.write(String.valueOf(builder));
+                    fileWriter.write(System.lineSeparator());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {
@@ -69,18 +61,24 @@ public class CSVReader {
         }
     }
 
+    private static void checkParams(ArgsName args) {
+        if (args.size() != 4) {
+            throw new IllegalArgumentException("Incorrect arguments");
+        }
+        if (!Paths.get(args.get("path")).toFile().isFile()) {
+            throw new IllegalArgumentException("Parameter 'path' is not file");
+        }
+        String targetPath = args.get("out");
+        if (!STDOUT.equals(targetPath) && !Paths.get(targetPath).toFile().isFile()) {
+            throw new IllegalArgumentException("Parameter 'out' is not file");
+        }
+        if (args.get("delimiter") == null) {
+            throw new IllegalArgumentException("Delimiter is null");
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        String sourcePath = "./csv/source.csv";
-        String targetPath = "./csv/target.csv";
-
-        ArgsName csvToCsvArgs = ArgsName.of(new String[]{
-                "-path=" + sourcePath, "-delimiter=;", "-out=" + targetPath, "-filter=name,age"
-        });
-        CSVReader.handle(csvToCsvArgs);
-
-        ArgsName csvToConsoleArgs = ArgsName.of(new String[]{
-                "-path=" + sourcePath, "-delimiter=;", "-out=" + STDOUT, "-filter=age,education"
-        });
-        CSVReader.handle(csvToConsoleArgs);
+        ArgsName argsNames = ArgsName.of(args);
+        handle(argsNames);
     }
 }
