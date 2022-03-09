@@ -62,12 +62,13 @@ public class CSVReader {
         if (args.size() != 4) {
             throw new IllegalArgumentException("Incorrect arguments");
         }
-        if (!Paths.get(args.get("path")).toFile().isFile()) {
-            throw new IllegalArgumentException("Parameter 'path' is not file");
+        Path source = Paths.get(args.get("path"));
+        if (!source.toFile().exists() || !source.toFile().isFile()) {
+            throw new IllegalArgumentException("Path not valid or not exist.");
         }
-        String targetPath = args.get("out");
-        if (!STDOUT.equals(targetPath) && !Paths.get(targetPath).toFile().isFile()) {
-            throw new IllegalArgumentException("Parameter 'out' is not file");
+        Path target = Paths.get(args.get("out"));
+        if (!STDOUT.equals(args.get("out")) && (!target.toFile().exists() || !target.toFile().isFile())) {
+            throw new IllegalArgumentException("Target not valid or not exist.");
         }
         if (args.get("delimiter") == null) {
             throw new IllegalArgumentException("Delimiter is null");
