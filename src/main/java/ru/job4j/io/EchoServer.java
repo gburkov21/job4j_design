@@ -1,11 +1,9 @@
 package ru.job4j.io;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class EchoServer {
     public static void main(String[] args) throws IOException {
@@ -15,13 +13,23 @@ public class EchoServer {
                 try (OutputStream out = socket.getOutputStream();
                      BufferedReader in = new BufferedReader(
                              new InputStreamReader(socket.getInputStream()))) {
-                    out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+                    String serverAnswer = "";
                     for (String str = in.readLine(); str != null && !str.isEmpty(); str = in.readLine()) {
-                        System.out.println(str);
-                        if (str.contains("msg=Bye")) {
-                            server.close();
+                        if (str.contains("?msg=")) {
+                            if (str.contains("Hello")) {
+                                serverAnswer = "Hello";
+                            } else if (str.contains("Exit")) {
+                                serverAnswer = "Exit";
+                                server.close();
+                            } else {
+                                serverAnswer = "What";
+                            }
                         }
+                        System.out.println(str);
                     }
+                    out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+                    out.write(serverAnswer.getBytes());
+
                     out.flush();
                 }
             }
