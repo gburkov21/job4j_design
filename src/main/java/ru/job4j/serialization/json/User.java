@@ -29,6 +29,26 @@ public class User {
         this.isMarried = isMarried;
     }
 
+    public boolean isMarried() {
+        return isMarried;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public String[] getHobbies() {
+        return hobbies;
+    }
+
     @Override
     public String toString() {
         return String.format("User{isMarried=%s, age=%d, name='%s', address=%s, hobbies=%s}", isMarried, age, name, address, Arrays.toString(hobbies));
