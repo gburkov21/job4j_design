@@ -1,0 +1,9 @@
+c:\projects\elementary.iml
+c:\projects\games_oop_javafx\chess\chess.iml
+c:\projects\games_oop_javafx\packman\packman.iml
+c:\projects\games_oop_javafx\puzzle\puzzle.iml
+c:\projects\games_oop_javafx\seabattle\seabattle.iml
+c:\projects\games_oop_javafx\tictactoe\tictactoe.iml
+c:\projects\job4j_design.iml
+c:\projects\testProject\testProject.iml
+c:\projects\tracker.iml
