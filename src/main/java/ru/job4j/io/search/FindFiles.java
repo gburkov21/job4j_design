@@ -23,9 +23,12 @@ public class FindFiles {
         String fileResult = argsName.get("o");
 
         List<Path> pathsList = switch (searchType) {
-            case "mask" -> Search.search(directory, p -> p.toFile().getName().endsWith(maskOrFileNameOrRegex.substring(1)));
-            case "name" -> Search.search(directory, p -> p.toFile().getName().equals(maskOrFileNameOrRegex));
-            case "regex" -> Search.search(directory, p -> Pattern.compile(maskOrFileNameOrRegex).matcher(p.toFile().getName()).matches());
+            case "mask" -> {
+                String regex = maskOrFileNameOrRegex.replace("?", ".?").replace("*", ".*?");
+                yield Search.search(directory, p -> p.toFile().getName().matches(regex));
+            }
+            case "name" -> Search.search(directory, p -> p.toFile().getName().equalsIgnoreCase(maskOrFileNameOrRegex));
+            case "regex" -> Search.search(directory, p -> p.toFile().getName().matches(maskOrFileNameOrRegex));
             default -> new ArrayList<>();
         };
         writeResultsToFile(fileResult, pathsList);
