@@ -1,0 +1,1 @@
+create database links_db;
