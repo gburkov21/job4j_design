@@ -12,51 +12,62 @@ public class TableEditor implements AutoCloseable {
 
     private Properties properties;
 
-    public TableEditor(Properties properties) {
+    public TableEditor(Properties properties) throws Exception {
         this.properties = properties;
         initConnection();
     }
 
-    private void initConnection() {
-        connection = null;
+    private void initConnection() throws Exception {
+        Class.forName("org.postgresql.Driver");
+        String url = properties.getProperty("jdbc.url");
+        String login = properties.getProperty("jdbc.login");
+        String password = properties.getProperty("jdbc.password");
+        this.connection = DriverManager.getConnection(url, login, password);
+
     }
 
-    private Statement getStatement(Connection connection) throws SQLException {
-        return connection.createStatement();
-    }
-
-    public void createTable(String tableName) throws SQLException {
-        try (Statement statement = getStatement(connection)) {
+    public void createTable(String tableName) {
+        try (Statement statement = connection.createStatement()) {
             String sql = String.format("create table if not exists %s();", tableName);
             statement.execute(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public void dropTable(String tableName) throws SQLException {
-        try (Statement statement = getStatement(connection)) {
+    public void dropTable(String tableName) {
+        try (Statement statement = connection.createStatement()) {
             String sql = String.format("drop table if exists %s;", tableName);
             statement.executeUpdate(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public void addColumn(String tableName, String columnName, String type) throws SQLException {
-        try (Statement statement = getStatement(connection)) {
+    public void addColumn(String tableName, String columnName, String type) {
+        try (Statement statement = connection.createStatement()) {
             String sql = String.format("alter table %s add if not exists %s %s;", tableName, columnName, type);
             statement.executeUpdate(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public void dropColumn(String tableName, String columnName) throws SQLException {
-        try (Statement statement = getStatement(connection)) {
+    public void dropColumn(String tableName, String columnName) {
+        try (Statement statement = connection.createStatement()) {
             String sql = String.format("alter table %s DROP COLUMN IF EXISTS %s;", tableName, columnName);
             statement.executeUpdate(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public void renameColumn(String tableName, String columnName, String newColumnName) throws SQLException {
-        try (Statement statement = getStatement(connection)) {
+    public void renameColumn(String tableName, String columnName, String newColumnName) {
+        try (Statement statement = connection.createStatement()) {
             String sql = String.format("alter table %s RENAME COLUMN %s TO %s;", tableName, columnName, newColumnName);
             statement.executeUpdate(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -84,50 +95,37 @@ public class TableEditor implements AutoCloseable {
             Properties properties = new Properties();
             properties.load(fileReader);
             TableEditor tableEditor = new TableEditor(properties);
-            try (Connection connection = tableEditor.getConnection()) {
-                tableEditor.connection = connection;
-                String tableName = "myTable";
+            String tableName = "myTable";
 
-                tableEditor.createTable(tableName);
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.createTable(tableName);
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.addColumn(tableName, "id", "serial primary key");
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.addColumn(tableName, "id", "serial primary key");
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.addColumn(tableName, "name", "varchar(255)");
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.addColumn(tableName, "name", "varchar(255)");
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.addColumn(tableName, "age", "int");
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.addColumn(tableName, "age", "int");
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.renameColumn(tableName, "name", "surname");
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.renameColumn(tableName, "name", "surname");
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.dropColumn(tableName, "age");
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.dropColumn(tableName, "age");
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.dropColumn(tableName, "surname");
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.dropColumn(tableName, "surname");
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.dropColumn(tableName, "id");
-                System.out.println(getTableScheme(connection, tableName));
+            tableEditor.dropColumn(tableName, "id");
+            System.out.println(getTableScheme(tableEditor.connection, tableName));
 
-                tableEditor.dropTable(tableName);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            tableEditor.dropTable(tableName);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private Connection getConnection() throws Exception {
-        Class.forName("org.postgresql.Driver");
-        String url = properties.getProperty("jdbc.url");
-        String login = properties.getProperty("jdbc.login");
-        String password = properties.getProperty("jdbc.password");
-        return DriverManager.getConnection(url, login, password);
     }
 
     @Override
