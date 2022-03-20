@@ -6,9 +6,9 @@ import java.sql.*;
 
 public class ConnectionDemo {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        Class.forName("org.postgresql.Driver");
         Config config = new Config("./jdbc/app.properties");
         config.load();
+        Class.forName(config.value("jdbc.driver"));
         String url = config.value("jdbc.url");
         String login = config.value("jdbc.login");
         String password = config.value("jdbc.password");
@@ -16,6 +16,7 @@ public class ConnectionDemo {
             DatabaseMetaData metaData = connection.getMetaData();
             System.out.println(metaData.getUserName());
             System.out.println(metaData.getURL());
+            System.out.println(metaData.getDriverName());
         }
     }
 }
