@@ -19,15 +19,20 @@ public class ImportDB {
         this.dump = dump;
     }
 
-    public List<User> load() throws IOException {
+    public List<User> load() {
         List<User> users = new ArrayList<>();
         try (BufferedReader rd = new BufferedReader(new FileReader(dump))) {
             rd.lines().forEach(line -> {
                 String[] array = line.split(";");
+                if (array.length != 2 || array[0].isBlank() || array[1].isBlank()) {
+                    throw new IllegalArgumentException("Incorrect arguments");
+                }
                 String userName = array[0];
                 String userEmail = array[1];
                 users.add(new User(userName, userEmail));
             });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return users;
     }
