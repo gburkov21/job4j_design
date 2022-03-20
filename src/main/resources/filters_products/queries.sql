@@ -30,3 +30,7 @@ from product p
          join type t on p.type_id = t.id
 group by t.name
 having count(*) < 10;
+
+select p.name, t.name
+from product p
+         join type t on t.id = p.type_id;
